@@ -14,14 +14,17 @@
             <button id="btn_submit" class="button shadow">CHECK</button>
         </div>
 
-        <div id="user_container" style="width: 400px; margin-top: 50px;">
+        <a href="javascript:{}" id="user_container" style="width: 400px; margin-top: 50px;">
             <img id="img_avatar" src="https://zekro.de/src/favicon.png">
             <ul>
-                <li><h3 id="lb_name" style="margin: 0px;">Name</h3></li>
-                <li><p  id="lb_tag"  style="margin: 5px 0px 0px 0px;"><i>Tag#5465</i></p></li>
-                <li><p  id="lb_info" style="margin: 5px 0px 0px 0px;">Running on ... guilds</p></li>
+                <li><h3 id="lb_name" class="nolink" style="margin: 0px;">Name</h3></li>
+                <li><p  id="lb_tag"  class="nolink" style="margin: 5px 0px 0px 0px;"><i>Tag#5465</i></p></li>
+                <li><p  id="lb_info" class="nolink" style="margin: 5px 0px 0px 0px;">Running on ... guilds</p></li>
             </ul>
-        </div>
+        </a>
+
+        <div><p id="lb_loading">Collecting guild data...</p></div>
+
     </center>
 
     <script src="/script.js"></script>

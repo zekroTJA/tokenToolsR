@@ -35,6 +35,7 @@ var ws = new WsClient(
 // ----------------------------------------------------------------
 
 var $ = (query) => document.querySelector(query);
+var guilds;
 
 var tb_token = $('#tb_token');
 var btn_submit = $('#btn_submit');
@@ -43,6 +44,7 @@ var lb_name = $('#lb_name');
 var lb_tag = $('#lb_tag');
 var lb_info = $('#lb_info');
 var img_avatar = $('#img_avatar');
+var lb_loading = $('#lb_loading');
 
 // ----------------------------------------------------------------
 
@@ -73,6 +75,21 @@ ws.on('tokenValid', (data) => {
 
     user_container.style.display = 'flex';
 });
+
+ws.on('guildInfo', (data) => {
+    lb_loading.style.display = 'none';
+    lb_loading.style.animation = '';
+
+    guilds = data;
+    console.log(data);
+    window.open('/guildswindow.html', 'Guilds', 'width=800,height=500');
+});
+
+user_container.onclick = () => {
+    ws.emit('getGuildInfo')
+    lb_loading.style.display = 'block';
+    lb_loading.style.animation = 'blink 2s ease infinite';
+};
 
 btn_submit.onclick = () => {
     let token = tb_token.value;

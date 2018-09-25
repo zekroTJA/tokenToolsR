@@ -99,36 +99,37 @@ func (d *Discord) GetInfo() (*User, error) {
 	return user, nil
 }
 
-func (d *Discord) GetGuilds() ([]*GuildInfo, error) {
-	guilds := make([]*Guild, 0)
-	err := d.request("GET", "users/@me/guilds", nil, &guilds)
+func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {
+	guildsResp := make([]*Guild, 0)
+	err := d.request("GET", "users/@me/guilds", nil, &guildsResp)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	guildInfos := make([]*GuildInfo, len(guilds))
-	for i, g := range guilds {
-		guild := new(Guild)
-		err = d.request("GET", "guilds/" + g.ID, nil, guild)
-		if err == nil {
-			ownerid := guild.Owner
-			owner := new(User)
-			d.request("GET", "users/" + ownerid, nil, owner)
-
-			guildMembers := make([]*struct{
-				ID string `json:"id"`
-			}, 0)
-			d.request("GET", "guilds/" + g.ID + "/members?limit=1000", nil, &guildMembers)
-			
-			guildInfo := &GuildInfo{
-				ID: 		guild.ID,
-				Name: 		guild.Name,
-				Owner:		owner,
-				Members: 	len(guildMembers),
+	for i, gld := range guildsResp {
+		go func(g *Guild) {
+			guild := new(Guild)
+			err = d.request("GET", "guilds/" + g.ID, nil, guild)
+			if err == nil {
+				ownerid := guild.Owner
+				owner := new(User)
+				d.request("GET", "users/" + ownerid, nil, owner)
+	
+				guildMembers := make([]*struct{
+					ID string `json:"id"`
+				}, 0)
+				d.request("GET", "guilds/" + g.ID + "/members?limit=1000", nil, &guildMembers)
+				
+				guildInfo := &GuildInfo{
+					ID: 		guild.ID,
+					Name: 		guild.Name,
+					Owner:		owner,
+					Members: 	len(guildMembers),
+				}
+				guilds <- guildInfo
 			}
-			guildInfos[i] = guildInfo
-		}
+		}(gld)
 	}
 
-	return guildInfos, nil
+	return nil
 }

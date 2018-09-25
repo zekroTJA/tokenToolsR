@@ -31,17 +31,63 @@ func main() {
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		if ws, err := NewWebSocket(w, r); err == nil {
+
+			var discord *Discord
+			var nguild int
+			var err error
+
 			ws.SetHandler("checkToken", func(e *Event) {
-				discord, err := NewDiscord(e.Data.(string))
+				discord, err = NewDiscord(e.Data.(string))
 				if err != nil {
 					sendInvalid(ws)
+					return
 				}
 				info, err := discord.GetInfo()
 				if err != nil {
 					sendInvalid(ws)
+					return
 				}
+				nguild = info.Guilds
 				sendValid(ws, info)
 			})
+
+			ws.SetHandler("getGuildInfo", func(e *Event) {
+				if discord == nil {
+					log.Println(discord)
+					return
+				}
+
+				guilds := make(chan *GuildInfo, nguild)
+
+				err := discord.GetGuilds(guilds)
+				if err != nil {
+					log.Println("[ERR]", err)
+					return
+				}
+				
+				collectedGuilds := make([]*GuildInfo, nguild)
+				counter := 0
+				_finished := false
+				for {
+					select {
+						case g := <- guilds:
+							collectedGuilds[counter] = g
+							counter++
+							log.Println(counter, nguild)
+					}
+					if _finished {
+						break
+					}
+				}
+
+				go func() {
+					ws.Out <- (&Event{
+						Name: "guildInfo",
+						Data: collectedGuilds,
+					}).Raw()
+				}()
+			})
+
 		} else {
 			log.Println("[ERR] ", err)
 		}
