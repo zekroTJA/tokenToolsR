@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -64,18 +64,16 @@ func main() {
 					log.Println("[ERR]", err)
 					return
 				}
-				
+
 				collectedGuilds := make([]*GuildInfo, nguild)
 				counter := 0
-				_finished := false
 				for {
 					select {
-						case g := <- guilds:
-							collectedGuilds[counter] = g
-							counter++
-							log.Println(counter, nguild)
+					case g := <-guilds:
+						collectedGuilds[counter] = g
+						counter++
 					}
-					if _finished {
+					if counter == nguild {
 						break
 					}
 				}

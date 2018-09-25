@@ -2,10 +2,10 @@ package main
 
 import (
 	"bytes"
-	"net/http"
+	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"encoding/json"
+	"net/http"
 )
 
 const (
@@ -13,43 +13,43 @@ const (
 )
 
 type Discord struct {
-	token	string
-	client	*http.Client
-	header	http.Header
+	token  string
+	client *http.Client
+	header http.Header
 }
 
 type ApiError struct {
-	Code	int		`json:"code"`
-	Message	string	`json:"message"`
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 
 type User struct {
-	ID 				string 	`json:"id"`
-	Username		string	`json:"username"`
-	Discriminator	string 	`json:"discriminator"`
-	Avatar			string	`json:"avatar"`
-	Guilds			int		`json:"guilds"`
+	ID            string `json:"id"`
+	Username      string `json:"username"`
+	Discriminator string `json:"discriminator"`
+	Avatar        string `json:"avatar"`
+	Guilds        int    `json:"guilds"`
 }
 
 type Guild struct {
-	ID 				string `json:"id"`
-	Name			string `json:"name"`
-	Owner			string `json:"owner_id"`
-	Members			int	   `json:"member_count"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Owner   string `json:"owner_id"`
+	Members int    `json:"member_count"`
 }
 
 type GuildInfo struct {
-	ID		string
-	Name	string
-	Owner	*User
-	Members int
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Owner   *User  `json:"owner"`
+	Members int    `json:"members"`
 }
 
 func NewDiscord(token string) (*Discord, error) {
 	client := &http.Client{}
 	header := http.Header{}
 	header.Add("User-Agent", "DiscordBot (https://github.com/zekrotja, 0.1.0)")
-	header.Add("Authorization", "Bot " + token)
+	header.Add("Authorization", "Bot "+token)
 	discord := &Discord{
 		token:  "Bot " + token,
 		client: client,
@@ -59,7 +59,7 @@ func NewDiscord(token string) (*Discord, error) {
 }
 
 func (d *Discord) request(method, endpoint string, data []byte, output interface{}) error {
-	req, err := http.NewRequest(method, APIROOT + "/" + endpoint, bytes.NewBuffer(data))
+	req, err := http.NewRequest(method, APIROOT+"/"+endpoint, bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (d *Discord) GetInfo() (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	guilds := make([]*struct{
+	guilds := make([]*struct {
 		ID string `json:"id"`
 	}, 0)
 	d.request("GET", "users/@me/guilds", nil, &guilds)
@@ -106,25 +106,25 @@ func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {
 		return err
 	}
 
-	for i, gld := range guildsResp {
+	for _, gld := range guildsResp {
 		go func(g *Guild) {
 			guild := new(Guild)
-			err = d.request("GET", "guilds/" + g.ID, nil, guild)
+			err = d.request("GET", "guilds/"+g.ID, nil, guild)
 			if err == nil {
 				ownerid := guild.Owner
 				owner := new(User)
-				d.request("GET", "users/" + ownerid, nil, owner)
-	
-				guildMembers := make([]*struct{
+				d.request("GET", "users/"+ownerid, nil, owner)
+
+				guildMembers := make([]*struct {
 					ID string `json:"id"`
 				}, 0)
-				d.request("GET", "guilds/" + g.ID + "/members?limit=1000", nil, &guildMembers)
-				
+				d.request("GET", "guilds/"+g.ID+"/members?limit=1000", nil, &guildMembers)
+
 				guildInfo := &GuildInfo{
-					ID: 		guild.ID,
-					Name: 		guild.Name,
-					Owner:		owner,
-					Members: 	len(guildMembers),
+					ID:      guild.ID,
+					Name:    guild.Name,
+					Owner:   owner,
+					Members: len(guildMembers),
 				}
 				guilds <- guildInfo
 			}

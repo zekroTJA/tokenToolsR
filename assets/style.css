@@ -26,6 +26,12 @@ ul {
     display: none;
     background-color: #37474F;
     border-radius: 3px;
+    cursor: pointer;
+    transition: all .25s ease-in-out;
+}
+
+#user_container:hover {
+    transform: scale(1.02);
 }
 
 #user_container img {
@@ -33,7 +39,6 @@ ul {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    transition: all .25s ease-in-out;
 }
 
 #lb_loading {
