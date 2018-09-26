@@ -1,9 +1,19 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
+)
+
+var (
+	fport = flag.String("port", "80", "Port which will be used to expose the app's web interface")
+	fversion = flag.Bool("version", false, "Display build version")
+
+	appVersion string = "testing build"
+	appCommit  string = "testing build"
+	appDate	   string = "testing build"
 )
 
 func sendInvalid(ws *WebSocket) {
@@ -26,6 +36,17 @@ func sendValid(ws *WebSocket, info *User) {
 }
 
 func main() {
+
+	flag.Parse()
+
+	if *fversion {
+		fmt.Printf("tokenToolsR © 2018 zekro Development\n"+
+				   "Version:   %s\n"+
+				   "Commit:    %s\n"+
+				   "Date:      %s\n",
+				   appVersion, appCommit, appDate)
+		return
+	}
 
 	http.Handle("/", http.FileServer(http.Dir("./assets")))
 
@@ -92,7 +113,7 @@ func main() {
 	})
 
 	log.Println("[INFO] listening...")
-	err := http.ListenAndServe(":1337", nil)
+	err := http.ListenAndServe(":"+*fport, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

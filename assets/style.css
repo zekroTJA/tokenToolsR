@@ -16,6 +16,10 @@ a, p, h1, h2, h3, h4, h5 {
     font-family: 'Montserrat', sans-serif;
 }
 
+a {
+    color: #4DD0E1;
+}
+
 ul {
     list-style-type: none;
     text-align: left;

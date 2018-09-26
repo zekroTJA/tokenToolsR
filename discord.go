@@ -41,7 +41,7 @@ type Guild struct {
 type GuildInfo struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
-	Owner   *User  `json:"owner"`
+	Owner   string `json:"owner"`
 	Members int    `json:"members"`
 }
 
@@ -112,18 +112,19 @@ func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {
 			err = d.request("GET", "guilds/"+g.ID, nil, guild)
 			if err == nil {
 				ownerid := guild.Owner
-				owner := new(User)
-				d.request("GET", "users/"+ownerid, nil, owner)
 
+				// owner := new(User)
+				// d.request("GET", "users/"+ownerid, nil, apierr)
+	
 				guildMembers := make([]*struct {
 					ID string `json:"id"`
 				}, 0)
 				d.request("GET", "guilds/"+g.ID+"/members?limit=1000", nil, &guildMembers)
-
+	
 				guildInfo := &GuildInfo{
 					ID:      guild.ID,
 					Name:    guild.Name,
-					Owner:   owner,
+					Owner:   ownerid,
 					Members: len(guildMembers),
 				}
 				guilds <- guildInfo
