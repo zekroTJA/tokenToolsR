@@ -26,7 +26,6 @@ func sendInvalid(ws *WebSocket) {
 }
 
 func sendValid(ws *WebSocket, info *User) {
-	info.Avatar = fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", info.ID, info.Avatar)
 	go func() {
 		ws.Out <- (&Event{
 			Name: "tokenValid",
@@ -105,6 +104,25 @@ func main() {
 						Data: collectedGuilds,
 					}).Raw()
 				}()
+			})
+
+			ws.SetHandler("getUserInfo", func(e *Event) {
+				if discord == nil {
+					return
+				}
+
+				uid := e.Data.(string)
+				user, err := discord.GetUser(uid)
+				if err == nil {
+					go func() {
+						ws.Out <- (&Event{
+							Name: "userInfo",
+							Data: user,
+						}).Raw()
+					}()
+				} else {
+					fmt.Println("[ERR]", err)
+				}
 			})
 
 		} else {

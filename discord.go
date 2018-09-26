@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -10,6 +11,7 @@ import (
 
 const (
 	APIROOT = "https://discordapp.com/api"
+	DEFAVATAR = "https://discordapp.com/assets/0e291f67c9274a1abdddeb3fd919cbaa.png"
 )
 
 type Discord struct {
@@ -91,12 +93,28 @@ func (d *Discord) GetInfo() (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	if user.Avatar == "" {
+		user.Avatar = DEFAVATAR
+	} else {
+		user.Avatar = fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", user.ID, user.Avatar)
+	}
 	guilds := make([]*struct {
 		ID string `json:"id"`
 	}, 0)
 	d.request("GET", "users/@me/guilds", nil, &guilds)
 	user.Guilds = len(guilds)
 	return user, nil
+}
+
+func (d *Discord) GetUser(uid string) (*User, error) {
+	user := new(User)
+	err := d.request("GET", "users/"+uid, nil, user)
+	if user.Avatar == "" {
+		user.Avatar = DEFAVATAR
+	} else {
+		user.Avatar = fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", user.ID, user.Avatar)
+	}
+	return user, err
 }
 
 func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {

@@ -49,6 +49,41 @@ ul {
     display: none;
 }
 
+#owner_container {
+    display: none;
+    justify-content: center;
+    position: fixed;
+    top: 30%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    background-color: #311B92;
+}
+
+#background_hider {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 98;
+    background-color: #000000c5;
+}
+
+#owner_container img {
+    width: 80px;
+    border-radius: 50%;
+    height: 80px;
+    margin: auto 20px auto 0px;
+}
+
+#lb_id {
+    background-color: #00000044;
+    padding: 4px;
+    border-radius: 5px;
+}
+
 .nolink {
     text-decoration: none !important;
     color: white !important;
