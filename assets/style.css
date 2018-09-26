@@ -132,3 +132,18 @@ ul {
     -moz-box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.5);
     box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.5);
 }
+
+.footer {
+	position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.footer div {
+	display: flex;
+  	justify-content: center;
+	height: 100px;
+	text-align: center;
+	background-color: #37474F;
+}
