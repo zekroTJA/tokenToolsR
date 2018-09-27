@@ -29,7 +29,8 @@ function WsClient(url) {
 }
 
 var ws = new WsClient(
-    window.location.href.replace(/((http)|(https)):\/\//gm, 'ws://') + 'ws'
+    window.location.href.replace(/((http)|(https)):\/\//gm, 
+        window.location.href.startsWith('http://') ? 'ws:/' : 'wss://') + 'ws'
 );
 
 // ----------------------------------------------------------------

@@ -1,21 +1,29 @@
 package main
 
 import (
-	"html/template"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"os"
 )
 
 var (
-	fport = flag.String("port", "80", "Port which will be used to expose the app's web interface")
-	fversion = flag.Bool("version", false, "Display build version")
+	fport     = flag.String("port", "80", "Port which will be used to expose the app's web interface")
+	fversion  = flag.Bool("version", false, "Display build version")
+	fcertfile = flag.String("cert", "", "The cert config file with fiel link to cert file and key file (see example cert config)")
 
 	appVersion string = "testing build"
 	appCommit  string = "testing build"
-	appDate	   string = "testing build"
+	appDate    string = "testing build"
 )
+
+type Cert struct {
+	CertFile string `json:"cert"`
+	KeyFile  string `json:"key"`
+}
 
 func sendInvalid(ws *WebSocket) {
 	go func() {
@@ -39,22 +47,35 @@ func main() {
 
 	flag.Parse()
 
+	cert := new(Cert)
+	if *fcertfile != "" {
+		filehandle, err := os.Open(*fcertfile)
+		if err != nil {
+			log.Fatal("[FATAL] ", err)
+		}
+		decoder := json.NewDecoder(filehandle)
+		err = decoder.Decode(cert)
+		if err != nil {
+			log.Fatal("[FATAL] ", err)
+		}
+	}
+
 	if *fversion {
 		fmt.Printf("tokenToolsR © 2018 zekro Development\n"+
-				   "Version:   %s\n"+
-				   "Commit:    %s\n"+
-				   "Date:      %s\n",
-				   appVersion, appCommit, appDate)
+			"Version:   %s\n"+
+			"Commit:    %s\n"+
+			"Date:      %s\n",
+			appVersion, appCommit, appDate)
 		return
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t := template.New("index.html")
 		t, _ = t.ParseFiles("./web/views/index.html")
-		t.Execute(w, struct{
+		t.Execute(w, struct {
 			VERSION string
 			COMMIT  string
-			DATE	string
+			DATE    string
 		}{
 			appVersion, appCommit, appDate,
 		})
@@ -144,7 +165,12 @@ func main() {
 	})
 
 	log.Println("[INFO] listening...")
-	err := http.ListenAndServe(":"+*fport, nil)
+	var err error
+	if *fcertfile != "" {
+		err = http.ListenAndServeTLS(":"+*fport, cert.CertFile, cert.KeyFile, nil)
+	} else {
+		err = http.ListenAndServe(":"+*fport, nil)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
