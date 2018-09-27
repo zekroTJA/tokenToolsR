@@ -2,12 +2,13 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="assets/style.css">
 </head>
 
 <body>
-    <center style="margin-top: 150px;">
-        <div style="display: flex; justify-content: center;">
+    <center>
+        <p style="font-size: 10px; margin-top: 10px;">BUILD VERSION {{.VERSION}} ( {{.COMMIT}} ) [{{.DATE}}]</p>
+        <div style="display: flex; justify-content: center; margin-top: 130px;">
             <h2 style="padding: 3px;">TOKEN TOOLS</h2><h2 style="
                 border: solid 1px white;
                 padding: 2px 5px;
@@ -38,7 +39,7 @@
                 <div style="margin-right: 50px;">
                     <ul style="list-style-type: none; text-align: left;">
                         <li><h4 style="margin: 0px;">Info</h4></li>
-                        <li><p style="margin: 10px 0px 0px;">TokenTools R</p></li>
+                        <li><p style="margin: 10px 0px 0px;">TokenTools R v.{{.VERSION}}</p></li>
                         <li><p style="margin: 5px 0px 0px;">© 2018 zekro Development</p></li>
                     </ul>
                 </div>
@@ -67,7 +68,7 @@
 
     </center>
 
-    <script src="/script.js"></script>
+    <script src="assets/script.js"></script>
 </body>
 
 </html>

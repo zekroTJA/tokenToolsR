@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"flag"
 	"fmt"
 	"log"
@@ -47,7 +48,19 @@ func main() {
 		return
 	}
 
-	http.Handle("/", http.FileServer(http.Dir("./assets")))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		t := template.New("index.html")
+		t, _ = t.ParseFiles("./views/index.html")
+		t.Execute(w, struct{
+			VERSION string
+			COMMIT  string
+			DATE	string
+		}{
+			appVersion, appCommit, appDate,
+		})
+	})
+
+	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./assets"))))
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		if ws, err := NewWebSocket(w, r); err == nil {

@@ -81,8 +81,7 @@ ws.on('guildInfo', (data) => {
     lb_loading.style.animation = '';
 
     guilds = data;
-    console.log(data);
-    window.open('/guildswindow.html', 'Guilds', 'width=800,height=500');
+    window.open('./assets/guildswindow.html', 'Guilds', 'width=800,height=500');
 });
 
 user_container.onclick = () => {

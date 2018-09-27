@@ -55,7 +55,7 @@ func (ws *WebSocket) Reader() {
 		if err != nil {
 			log.Printf("[ERROR | MSG] %v", err)
 		} else {
-			log.Printf("[MSG] %v", event)
+			// log.Printf("[MSG] %v", event)
 		}
 		if action, ok := ws.Events[event.Name]; ok {
 			action(event)
