@@ -50,7 +50,7 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t := template.New("index.html")
-		t, _ = t.ParseFiles("./views/index.html")
+		t, _ = t.ParseFiles("./web/views/index.html")
 		t.Execute(w, struct{
 			VERSION string
 			COMMIT  string
@@ -60,7 +60,7 @@ func main() {
 		})
 	})
 
-	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./assets"))))
+	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./web/assets"))))
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		if ws, err := NewWebSocket(w, r); err == nil {
