@@ -143,7 +143,20 @@ ul {
 .footer div {
 	display: flex;
   	justify-content: center;
-	height: 100px;
+	height: 93px;
 	text-align: center;
 	background-color: #37474F;
+}
+
+.heading {
+    font-weight: 300;
+    font-size: 30px;
+}
+
+.footer_text {
+    font-size: 12px;
+}
+
+.footer_header {
+    font-size: 14px;
 }

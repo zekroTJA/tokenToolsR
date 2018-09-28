@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -69,7 +70,9 @@ func main() {
 		return
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t := template.New("index.html")
 		t, _ = t.ParseFiles("./web/views/index.html")
 		t.Execute(w, struct {
@@ -81,9 +84,7 @@ func main() {
 		})
 	})
 
-	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./web/assets"))))
-
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		if ws, err := NewWebSocket(w, r); err == nil {
 
 			var discord *Discord
@@ -163,6 +164,11 @@ func main() {
 			log.Println("[ERR] ", err)
 		}
 	})
+
+	InitApi(router, "/api")
+
+	http.Handle("/", router)
+	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./web/assets"))))
 
 	log.Println("[INFO] listening...")
 	var err error

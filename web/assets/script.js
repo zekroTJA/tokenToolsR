@@ -93,7 +93,7 @@ user_container.onclick = () => {
 
 btn_submit.onclick = () => {
     let token = tb_token.value;
-    if (token.length > 10) {
+    if (token.length > 40) {
         ws.emit('checkToken', token);
     } else {
         displayInvalid();

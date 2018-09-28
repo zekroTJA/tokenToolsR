@@ -76,7 +76,6 @@ func (d *Discord) request(method, endpoint string, data []byte, output interface
 	if err != nil {
 		return err
 	}
-
 	apiError := &ApiError{Code: -1}
 	err = json.Unmarshal(resData, apiError)
 	if err == nil && apiError.Code != -1 && apiError.Message != "" {
@@ -130,9 +129,6 @@ func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {
 			err = d.request("GET", "guilds/"+g.ID, nil, guild)
 			if err == nil {
 				ownerid := guild.Owner
-
-				// owner := new(User)
-				// d.request("GET", "users/"+ownerid, nil, apierr)
 	
 				guildMembers := make([]*struct {
 					ID string `json:"id"`
