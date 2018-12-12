@@ -24,7 +24,7 @@
 
 With this tool, you can check the validity of Discord **bot** tokens (*not user tokens, because it is **very** dangerous to handle with this tokens publicly!*), get informations about ther accounts and the number and details of the servers the bot account is connected to.
 
-![](https://cdn.zekro.de/ss/chrome_2018-10-05_16-32-42.png)
+![](https://i.zekro.de/chrome_2018-10-05_16-32-42.png)
 *Screenshot of build version 1.1.0 (d2c4cb876d95d900d1d4a06462b71d5f575df571)*
 
 > **DISCLAIMER:**  
