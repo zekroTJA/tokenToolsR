@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Guilds</title>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <style>
+        table, th, td {
+            border: 1px solid white;
+            border-collapse: collapse;
+            padding: 5px 10px 5px 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <table style="width: 100%" border="1" id="t_guilds">
+        <tr>
+            <th>ID</th>
+            <th>NAME</th>
+            <th>OWNER ID</th>
+        </tr>
+    </table>
+
+    <div id="background_hider" onclick="hideUserInfo()"></div>
+    <div id="owner_container">
+        <img id="img_avatar" src="https://zekro.de/src/favicon.png">
+        <ul>
+            <li><h3 id="lb_name" class="nolink" style="margin: 0px;">Name</h3></li>
+            <li><p  id="lb_tag"  class="nolink" style="margin: 5px 0px 0px 0px;"><i>Tag#5465</i></p></li>
+            <li><p  id="lb_id" class="nolink" style="margin: 5px 0px 0px 0px;">ID</p></li>
+        </ul>
+    </div>
+
+    <script src="guildswindow.js"></script>
+
+</body>
+
+</html>
