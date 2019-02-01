@@ -1,19 +1,18 @@
-package main
+package ratelimit
 
 import (
-	"time"
 	"strings"
-	"net/http"
+	"time"
 )
 
 var RATE_LIMITS = map[string]int64{
 	"general": 1,
-	"guilds": 2,
+	"guilds":  2,
 }
 
 var requestTimes = map[[2]string]int64{}
 
-func CheckRatelimit(w http.ResponseWriter, addr, endpoint string) bool {
+func CheckRatelimit(addr, endpoint string) bool {
 	limit := RATE_LIMITS[endpoint]
 	addrSplit := strings.Split(addr, ":")[0]
 	if addr == "" || addrSplit == "[" {
@@ -21,7 +20,6 @@ func CheckRatelimit(w http.ResponseWriter, addr, endpoint string) bool {
 	}
 	if reqTime, ok := requestTimes[[2]string{addr, endpoint}]; ok {
 		if reqTime+limit > time.Now().Unix() {
-			SendResponse(w, 900, nil)
 			return true
 		}
 	}

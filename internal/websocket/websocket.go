@@ -1,4 +1,4 @@
-package main
+package websocket
 
 import (
 	"log"
@@ -29,9 +29,9 @@ func NewWebSocket(w http.ResponseWriter, r *http.Request) (*WebSocket, error) {
 		return nil, err
 	}
 	ws := &WebSocket{
-		Conn: conn, 
-		Out: make(chan []byte), 
-		In: make(chan []byte), 
+		Conn:   conn,
+		Out:    make(chan []byte),
+		In:     make(chan []byte),
 		Events: make(map[string]EventHandler),
 	}
 	go ws.Reader()
@@ -65,19 +65,17 @@ func (ws *WebSocket) Reader() {
 
 func (ws *WebSocket) Writer() {
 	for {
-		select {
-		case message, ok := <-ws.Out:
-			if !ok {
-				ws.Conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
-			w, err := ws.Conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-			w.Write(message)
-			w.Close()
+		message, ok := <-ws.Out
+		if !ok {
+			ws.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+			return
 		}
+		w, err := ws.Conn.NextWriter(websocket.TextMessage)
+		if err != nil {
+			return
+		}
+		w.Write(message)
+		w.Close()
 	}
 }
 

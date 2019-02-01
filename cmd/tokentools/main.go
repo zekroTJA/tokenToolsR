@@ -10,6 +10,9 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/zekroTJA/tokenToolsR/internal/api"
+	"github.com/zekroTJA/tokenToolsR/internal/websocket"
+	"github.com/zekroTJA/tokenToolsR/pkg/discord"
 )
 
 var (
@@ -27,18 +30,18 @@ type Cert struct {
 	KeyFile  string `json:"key"`
 }
 
-func sendInvalid(ws *WebSocket) {
+func sendInvalid(ws *websocket.WebSocket) {
 	go func() {
-		ws.Out <- (&Event{
+		ws.Out <- (&websocket.Event{
 			Name: "tokenInvalid",
 			Data: nil,
 		}).Raw()
 	}()
 }
 
-func sendValid(ws *WebSocket, info *User) {
+func sendValid(ws *websocket.WebSocket, info *discord.User) {
 	go func() {
-		ws.Out <- (&Event{
+		ws.Out <- (&websocket.Event{
 			Name: "tokenValid",
 			Data: info,
 		}).Raw()
@@ -86,19 +89,19 @@ func main() {
 	})
 
 	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		if ws, err := NewWebSocket(w, r); err == nil {
+		if ws, err := websocket.NewWebSocket(w, r); err == nil {
 
-			var discord *Discord
+			var dc *discord.Discord
 			var nguild int
 			var err error
 
-			ws.SetHandler("checkToken", func(e *Event) {
-				discord, err = NewDiscord(e.Data.(string))
+			ws.SetHandler("checkToken", func(e *websocket.Event) {
+				dc, err = discord.NewDiscord(e.Data.(string))
 				if err != nil {
 					sendInvalid(ws)
 					return
 				}
-				info, err := discord.GetInfo()
+				info, err := dc.GetInfo()
 				if err != nil {
 					sendInvalid(ws)
 					return
@@ -107,21 +110,20 @@ func main() {
 				sendValid(ws, info)
 			})
 
-			ws.SetHandler("getGuildInfo", func(e *Event) {
-				if discord == nil {
-					log.Println(discord)
+			ws.SetHandler("getGuildInfo", func(e *websocket.Event) {
+				if dc == nil {
 					return
 				}
 
-				guilds := make(chan *GuildInfo, nguild)
+				guilds := make(chan *discord.GuildInfo, nguild)
 
-				err := discord.GetGuilds(guilds)
+				err := dc.GetGuilds(guilds)
 				if err != nil {
 					log.Println("[ERR]", err)
 					return
 				}
 
-				collectedGuilds := make([]*GuildInfo, nguild)
+				collectedGuilds := make([]*discord.GuildInfo, nguild)
 				counter := 0
 				for {
 					select {
@@ -135,23 +137,23 @@ func main() {
 				}
 
 				go func() {
-					ws.Out <- (&Event{
+					ws.Out <- (&websocket.Event{
 						Name: "guildInfo",
 						Data: collectedGuilds,
 					}).Raw()
 				}()
 			})
 
-			ws.SetHandler("getUserInfo", func(e *Event) {
-				if discord == nil {
+			ws.SetHandler("getUserInfo", func(e *websocket.Event) {
+				if dc == nil {
 					return
 				}
 
 				uid := e.Data.(string)
-				user, err := discord.GetUser(uid)
+				user, err := dc.GetUser(uid)
 				if err == nil {
 					go func() {
-						ws.Out <- (&Event{
+						ws.Out <- (&websocket.Event{
 							Name: "userInfo",
 							Data: user,
 						}).Raw()
@@ -166,7 +168,7 @@ func main() {
 		}
 	})
 
-	InitApi(router, "/api")
+	api.InitApi(router, "/api")
 
 	http.Handle("/", router)
 	http.Handle("/static/", http.StripPrefix("/static", http.FileServer(http.Dir("./assets/static"))))
