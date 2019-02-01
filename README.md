@@ -50,7 +50,7 @@ ARCH=amd64
 #######################
 ```
 
-3. Use teh script to build:  
+3. Use the script to build:  
 ```
 $ bash build.sh
 ```
