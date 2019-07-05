@@ -19,6 +19,7 @@ var (
 	fversion  = flag.Bool("version", false, "Display build version")
 	fcertfile = flag.String("tls-cert", "", "The TLS cert file")
 	fkeyfile  = flag.String("tls-key", "", "The TLS key file")
+	ftls      = flag.Bool("tls", false, "Wether or not to enable TLS")
 )
 
 func sendInvalid(w *ws.WebSocket) {
@@ -154,7 +155,7 @@ func main() {
 
 	log.Println("[INFO] listening...")
 	var err error
-	if *fcertfile != "" && *fkeyfile != "" {
+	if *ftls && *fcertfile != "" && *fkeyfile != "" {
 		err = http.ListenAndServeTLS(":"+*fport, *fcertfile, *fkeyfile, nil)
 	} else {
 		err = http.ListenAndServe(":"+*fport, nil)

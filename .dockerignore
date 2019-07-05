@@ -1,0 +1,6 @@
+docs/
+scripts/
+.gitignore
+Gopkg.lock
+Makefile
+*.md
