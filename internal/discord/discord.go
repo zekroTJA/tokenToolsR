@@ -1,16 +1,15 @@
 package discord
 
 import (
-	"fmt"
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
 
 const (
-	APIROOT = "https://discordapp.com/api"
+	APIROOT   = "https://discordapp.com/api"
 	DEFAVATAR = "https://discordapp.com/assets/0e291f67c9274a1abdddeb3fd919cbaa.png"
 )
 
@@ -72,14 +71,13 @@ func (d *Discord) request(method, endpoint string, data []byte, output interface
 		return err
 	}
 
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("discord response: %d", res.StatusCode)
+	}
+
 	resData, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
-	}
-	apiError := &ApiError{Code: -1}
-	err = json.Unmarshal(resData, apiError)
-	if err == nil && apiError.Code != -1 && apiError.Message != "" {
-		return errors.New("API ERROR: " + apiError.Message)
 	}
 
 	err = json.Unmarshal(resData, output)
@@ -92,16 +90,21 @@ func (d *Discord) GetInfo() (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if user.Avatar == "" {
 		user.Avatar = DEFAVATAR
 	} else {
 		user.Avatar = fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", user.ID, user.Avatar)
 	}
+
 	guilds := make([]*struct {
 		ID string `json:"id"`
 	}, 0)
+
 	d.request("GET", "users/@me/guilds", nil, &guilds)
+
 	user.Guilds = len(guilds)
+
 	return user, nil
 }
 
@@ -129,12 +132,12 @@ func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {
 			err = d.request("GET", "guilds/"+g.ID, nil, guild)
 			if err == nil {
 				ownerid := guild.Owner
-	
+
 				guildMembers := make([]*struct {
 					ID string `json:"id"`
 				}, 0)
 				d.request("GET", "guilds/"+g.ID+"/members?limit=1000", nil, &guildMembers)
-	
+
 				guildInfo := &GuildInfo{
 					ID:      guild.ID,
 					Name:    guild.Name,
