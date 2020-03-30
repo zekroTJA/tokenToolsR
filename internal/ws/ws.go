@@ -34,12 +34,17 @@ func NewWebSocket(w http.ResponseWriter, r *http.Request) (*WebSocket, error) {
 		In:     make(chan []byte),
 		Events: make(map[string]EventHandler),
 	}
-	go ws.Reader()
-	go ws.Writer()
+	go ws.reader()
+	go ws.writer()
 	return ws, nil
 }
 
-func (ws *WebSocket) Reader() {
+func (ws *WebSocket) SetHandler(event string, action EventHandler) *WebSocket {
+	ws.Events[event] = action
+	return ws
+}
+
+func (ws *WebSocket) reader() {
 	defer func() {
 		ws.Conn.Close()
 	}()
@@ -63,7 +68,7 @@ func (ws *WebSocket) Reader() {
 	}
 }
 
-func (ws *WebSocket) Writer() {
+func (ws *WebSocket) writer() {
 	for {
 		select {
 		case message, ok := <-ws.Out:
@@ -79,9 +84,4 @@ func (ws *WebSocket) Writer() {
 			w.Close()
 		}
 	}
-}
-
-func (ws *WebSocket) SetHandler(event string, action EventHandler) *WebSocket {
-	ws.Events[event] = action
-	return ws
 }
