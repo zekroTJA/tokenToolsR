@@ -18,7 +18,8 @@ RUN go build \
         -ldflags "\
             -X github.com/zekroTJA/tokenToolsR/internal/static.AppDate=$(date -u '+%Y-%m-%d_%I:%M:%S%p') \
             -X github.com/zekroTJA/tokenToolsR/internal/static.AppVersion=$(git describe --tags) \
-            -X github.com/zekroTJA/tokenToolsR/internal/static.AppCommit=$(git rev-parse HEAD)" \
+            -X github.com/zekroTJA/tokenToolsR/internal/static.AppCommit=$(git rev-parse HEAD) \
+            -X github.com/zekroTJA/tokenToolsR/internal/static.AppProd=TRUE" \
         ./cmd/tokentools/*.go
 
 

@@ -4,3 +4,5 @@ scripts/
 Gopkg.lock
 Makefile
 *.md
+**/node_modules/
+**/build/

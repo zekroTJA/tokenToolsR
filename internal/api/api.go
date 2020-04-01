@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/zekroTJA/tokenToolsR/internal/static"
+
 	"github.com/gorilla/mux"
 	"github.com/zekroTJA/tokenToolsR/internal/discord"
 )
@@ -33,7 +35,13 @@ type TokenState struct {
 	Guilds        int    `json:"guilds"`
 }
 
-func SendResponse(w http.ResponseWriter, code int, data interface{}) {
+type Info struct {
+	Version string `json:"version"`
+	Commit  string `json:"commit"`
+	Date    string `json:"date"`
+}
+
+func sendResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	response := &Response{
@@ -45,39 +53,48 @@ func SendResponse(w http.ResponseWriter, code int, data interface{}) {
 	w.Write(bdata)
 }
 
+func addCorsHeaders(w http.ResponseWriter) {
+	if static.AppProd == "TRUE" {
+		return
+	}
+
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+}
+
 func InitApi(r *mux.Router, root string) {
 
 	// GET check/:token
 	r.HandleFunc(root+"/check/{token}", func(w http.ResponseWriter, r *http.Request) {
-		if !CheckRatelimit(w, r) {
+		if !checkRatelimit(w, r) {
 			return
 		}
+		addCorsHeaders(w)
 
 		params := mux.Vars(r)
 
 		token, ok := params["token"]
 		if !ok {
-			SendResponse(w, 400, nil)
+			sendResponse(w, 400, nil)
 			return
 		}
 
 		if len(token) <= 40 {
-			SendResponse(w, 200, &TokenState{Valid: false})
+			sendResponse(w, 200, &TokenState{Valid: false})
 			return
 		}
 
 		discord, err := discord.NewDiscord(token)
 		if err != nil {
-			SendResponse(w, 500, err)
+			sendResponse(w, 500, err)
 			return
 		}
 		info, err := discord.GetInfo()
 		if err != nil {
-			SendResponse(w, 200, &TokenState{Valid: false})
+			sendResponse(w, 200, &TokenState{Valid: false})
 			return
 		}
 		tokenChache[token] = info.Guilds
-		SendResponse(w, 200, &TokenState{
+		sendResponse(w, 200, &TokenState{
 			Valid:         true,
 			ID:            info.ID,
 			Username:      info.Username,
@@ -88,27 +105,29 @@ func InitApi(r *mux.Router, root string) {
 
 	}).Methods("GET")
 
+	// GET guilds/:token
 	r.HandleFunc(root+"/guilds/{token}", func(w http.ResponseWriter, r *http.Request) {
-		if !CheckRatelimit(w, r) {
+		if !checkRatelimit(w, r) {
 			return
 		}
+		addCorsHeaders(w)
 
 		params := mux.Vars(r)
 
 		token, ok := params["token"]
 		if !ok {
-			SendResponse(w, 400, nil)
+			sendResponse(w, 400, nil)
 			return
 		}
 
 		if len(token) <= 40 {
-			SendResponse(w, 400, "token invalid")
+			sendResponse(w, 400, "token invalid")
 			return
 		}
 
 		dc, err := discord.NewDiscord(token)
 		if err != nil {
-			SendResponse(w, 500, err)
+			sendResponse(w, 500, err)
 			return
 		}
 
@@ -116,7 +135,7 @@ func InitApi(r *mux.Router, root string) {
 		if !ok {
 			info, err := dc.GetInfo()
 			if err != nil {
-				SendResponse(w, 400, "token invalid")
+				sendResponse(w, 400, "token invalid")
 				return
 			}
 			nguild = info.Guilds
@@ -145,8 +164,24 @@ func InitApi(r *mux.Router, root string) {
 			}
 		}
 
-		SendResponse(w, 200, collectedGuilds)
+		sendResponse(w, 200, collectedGuilds)
 
 	}).Methods("GET")
 
+	// GET info
+	r.HandleFunc(root+"/info", func(w http.ResponseWriter, r *http.Request) {
+		if !checkRatelimit(w, r) {
+			return
+		}
+		addCorsHeaders(w)
+
+		info := &Info{
+			Commit:  static.AppCommit,
+			Date:    static.AppDate,
+			Version: static.AppVersion,
+		}
+
+		sendResponse(w, 200, info)
+
+	}).Methods("GET")
 }

@@ -143,7 +143,6 @@ func main() {
 	router.PathPrefix("/").Handler(spaHandler)
 
 	http.Handle("/", router)
-	// http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./web/assets"))))
 
 	log.Println("[INFO] listening...")
 	var err error
