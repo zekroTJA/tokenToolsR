@@ -3,13 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/zekroTJA/tokenToolsR/internal/api"
 	"github.com/zekroTJA/tokenToolsR/internal/discord"
+	"github.com/zekroTJA/tokenToolsR/internal/spa"
 	"github.com/zekroTJA/tokenToolsR/internal/static"
 	"github.com/zekroTJA/tokenToolsR/internal/ws"
 )
@@ -20,6 +20,7 @@ var (
 	fcertfile = flag.String("tls-cert", "", "The TLS cert file")
 	fkeyfile  = flag.String("tls-key", "", "The TLS key file")
 	ftls      = flag.Bool("tls", false, "Wether or not to enable TLS")
+	fwebdir   = flag.String("web", "./web/build", "static web files location")
 )
 
 func sendInvalid(w *ws.WebSocket) {
@@ -45,7 +46,7 @@ func main() {
 	flag.Parse()
 
 	if *fversion {
-		fmt.Printf("tokenToolsR © 2018 zekro Development\n"+
+		fmt.Printf("tokenToolsR © 2020 zekro Development\n"+
 			"Version:   %s\n"+
 			"Commit:    %s\n"+
 			"Date:      %s\n",
@@ -54,18 +55,6 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t := template.New("index.html")
-		t, _ = t.ParseFiles("./web/views/index.html")
-		t.Execute(w, struct {
-			VERSION string
-			COMMIT  string
-			DATE    string
-		}{
-			static.AppVersion, static.AppCommit, static.AppDate,
-		})
-	})
 
 	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		if w, err := ws.NewWebSocket(w, r); err == nil {
@@ -150,8 +139,11 @@ func main() {
 
 	api.InitApi(router, "/api")
 
+	spaHandler := spa.NewSPA(*fwebdir, "index.html")
+	router.PathPrefix("/").Handler(spaHandler)
+
 	http.Handle("/", router)
-	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./web/assets"))))
+	// http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./web/assets"))))
 
 	log.Println("[INFO] listening...")
 	var err error
