@@ -1,38 +1,39 @@
-FROM golang:1.12.6-stretch
-
+FROM golang:1.14-alpine AS build
 LABEL maintainer="zekro <contact@zekro.de>"
 
-RUN apt-get update -y &&\
-    apt-get install -y \
-        git
+WORKDIR /build
 
-ENV PATH="${GOPATH}/bin:${PATH}"
-
-ENV TLS="false"
-
-RUN go get -u github.com/golang/dep/cmd/dep
-
-WORKDIR ${GOPATH}/src/github.com/zekroTJA/tokenToolsR
+RUN apk add --update \
+        nodejs npm git
 
 ADD . .
 
-RUN mkdir -p /etc/certs
-
-RUN dep ensure -v
+RUN cd web &&\
+    npm ci &&\
+    npm run build
 
 RUN go build \
         -v \
-        -o /usr/bin/tt \
+        -o tt \
         -ldflags "\
             -X github.com/zekroTJA/tokenToolsR/internal/static.AppDate=$(date -u '+%Y-%m-%d_%I:%M:%S%p') \
             -X github.com/zekroTJA/tokenToolsR/internal/static.AppVersion=$(git describe --tags) \
             -X github.com/zekroTJA/tokenToolsR/internal/static.AppCommit=$(git rev-parse HEAD)" \
         ./cmd/tokentools/*.go
 
+
+FROM alpine:latest AS final
+
+COPY --from=build /build/tt /app/tt
+COPY --from=build /build/web/build /app/web
+
+RUN mkdir -p /etc/certs
+RUN chmod +x /app/tt
+
+ENV TLS="false"
+
 EXPOSE 8080
 
-CMD tt \
-        -port 8080 \
-        -tls-cert /etc/cert/*.cer \
-        -tls-key  /etc/cert/*.key \
-        -tls="$TLS"
+ENTRYPOINT ["/app/tt", "-web", "/app/web"]
+
+CMD ["-port", "8080"]
