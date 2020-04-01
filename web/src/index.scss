@@ -1,0 +1,29 @@
+@import 'styles/vars.scss';
+
+body {
+  margin: 0;
+  font-family: 'Oxygen', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  color: white;
+
+  background-color: $c-bg;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: white;
+}
+
+
+.flex {
+  display: flex;
+}
+
+.w-100 {
+  width: 100%;
+}

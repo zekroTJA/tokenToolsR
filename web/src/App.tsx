@@ -1,37 +1,21 @@
-import React, { Props, Component } from 'react';
-import './App.css';
-import WebSocketAPI, { EventHandlerRemover } from './api/ws';
+/** @format */
+
+import React, { Component } from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import WebSocketAPI from './api/ws';
+import MainRoute from './routes/main/Main';
+import './App.scss';
 
 export default class App extends Component<{ wsapi: WebSocketAPI }> {
-
-  public state = { valid: '' };
-
-  private unmounts: EventHandlerRemover[] = [];
-
-  constructor(props: Readonly<any>) {
-    super(props);
-
-    this.unmounts.push(this.props.wsapi.on('tokenInvalid', () => {
-      this.setState({ valid: 'invalid' });
-    }));
-
-    this.unmounts.push(this.props.wsapi.on('tokenValid', () => {
-      this.setState({ valid: 'valid' });
-    }));
-  }
-
-  public componentWillUnmount() {
-
-  }
-  
   public render() {
-    return <div>
-      <a onClick={ () => this.onSubmit() } href="#">SUBMIT</a>
-      <p>{ this.state.valid }</p>
-      </div>;
-  }
-
-  private onSubmit() {
-    this.props.wsapi.send('checkToken', 'sdhjkfhasdfjklhasdflhjk');
+    return (
+      <Router>
+        <Route
+          path="/"
+          exact={true}
+          render={() => <MainRoute wsapi={this.props.wsapi} />}
+        />
+      </Router>
+    );
   }
 }

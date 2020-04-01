@@ -1,4 +1,6 @@
-import { WSMessage } from "./model";
+/** @format */
+
+import { WSMessage } from './model';
 
 export type EventHandler = (...args: any) => void;
 export type EventHandlerRemover = () => void;
@@ -10,20 +12,19 @@ export default class WebSocketAPI {
   constructor(url: string) {
     this.ws = new WebSocket(url);
 
-    this.ws.onmessage = response => {
+    this.ws.onmessage = (response) => {
       try {
         const data = JSON.parse(response.data) as WSMessage;
         if (data) {
-          const handler = this.handlers[data.event];
           this.emit(data.event, data.data);
         }
       } catch (err) {
-        this.emit("error", err);
+        this.emit('error', err);
       }
     };
 
-    this.ws.onerror = error => {
-      this.emit("error", error);
+    this.ws.onerror = (error) => {
+      this.emit('error', error);
     };
   }
 
@@ -41,13 +42,13 @@ export default class WebSocketAPI {
   }
 
   public onerror(handler: EventHandler): EventHandlerRemover {
-    return this.on("error", handler);
+    return this.on('error', handler);
   }
 
   public send(event: string, data: any) {
     const rawData = JSON.stringify({
       event,
-      data
+      data,
     } as WSMessage);
 
     this.ws.send(rawData);
@@ -55,7 +56,7 @@ export default class WebSocketAPI {
 
   private emit(event: string, ...args: any) {
     if (this.handlers[event]) {
-      this.handlers[event].forEach(h => {
+      this.handlers[event].forEach((h) => {
         if (h) h(args);
       });
     }

@@ -1,0 +1,81 @@
+@import '../../styles/vars.scss';
+
+@keyframes loadinganimation {
+  0% { width: 0%; margin-left: 0%; }
+  50% { width: 100%; margin-left: 0%; }
+  100% { width: 0%; margin-left: 100%; }
+}
+
+.inpt-body-container {
+  width: 100%;
+  display: flex;
+  margin-top: 10%;
+}
+
+.token-input-wrapper {
+  margin: 0 auto;
+  width: 80%;
+
+  max-width: 400px;
+  button {
+    margin: 50px auto;
+  }
+}
+
+.token-input {
+  width: 100%;
+  position: relative;
+
+  background-color: #00000062;
+  border: none;
+  outline: none;
+  color: white;
+  z-index: 1;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.validity-ident {
+  width: 100%;
+  height: 0px;
+  background-color: red;
+
+  transition: all .25s ease;
+}
+
+.validity-ident.display {
+  height: 6px;
+}
+
+.check-btn {
+  position: relative;
+  cursor: pointer;
+  background-color: #00000062;
+  z-index: 1;
+  border: none;
+  outline: none;
+  color: white;
+  padding: 10px 15px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    background-color: $c-accent-1;
+    z-index: -1;
+
+    transition: all .25s ease;
+  }
+
+  &:hover::after {
+    width: 100%;
+  }
+}
+
+.check-btn.loading::after {
+  background-color: $c-accent-2;
+  animation: loadinganimation 1s ease infinite;
+}
