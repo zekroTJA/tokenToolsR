@@ -2,6 +2,7 @@
 
 import React, { Component, FormEvent } from 'react';
 import WebSocketAPI, { EventHandlerRemover } from '../../api/ws';
+
 import './Main.scss';
 
 enum VALIDITY {
