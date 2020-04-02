@@ -10,9 +10,9 @@ import './index.scss';
 const wsuri =
   process.env.NODE_ENV === 'development'
     ? 'ws://localhost:8081/ws'
-    : window.location.href.replace(
+    : window.location.origin.replace(
         /((http)|(https)):\/\//gm,
-        window.location.href.startsWith('http://') ? 'ws:/' : 'wss://'
+        window.location.origin.startsWith('http://') ? 'ws:/' : 'wss://'
       ) + 'ws';
 
 const wsapi = new WebSocketAPI(wsuri);

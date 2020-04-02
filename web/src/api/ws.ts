@@ -8,6 +8,7 @@ export type EventHandlerRemover = () => void;
 export default class WebSocketAPI {
   private ws: WebSocket;
   private handlers: { [key: string]: EventHandler[] } = {};
+  private open = false;
 
   constructor(url: string) {
     this.ws = new WebSocket(url);
@@ -28,6 +29,7 @@ export default class WebSocketAPI {
     };
 
     this.ws.onopen = (event) => {
+      this.open = true;
       this.emit('open', event);
     };
   }
@@ -49,6 +51,15 @@ export default class WebSocketAPI {
     return this.on('error', handler);
   }
 
+  public onopen(handler: EventHandler): EventHandlerRemover {
+    if (this.open) {
+      handler(null);
+      return () => {};
+    }
+
+    return this.on('open', handler);
+  }
+
   public send(event: string, data: any) {
     const rawData = JSON.stringify({
       event,
@@ -56,6 +67,10 @@ export default class WebSocketAPI {
     } as WSMessage);
 
     this.ws.send(rawData);
+  }
+
+  public get isOpen(): boolean {
+    return this.open;
   }
 
   private emit(event: string, data: any) {

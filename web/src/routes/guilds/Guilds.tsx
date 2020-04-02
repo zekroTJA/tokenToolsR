@@ -19,7 +19,7 @@ export default class GuildsRoute extends Component<{
 
   public componentDidMount() {
     this.unmounts.push(
-      this.props.wsapi.on('open', () => {
+      this.props.wsapi.onopen(() => {
         this.props.wsapi.send('getGuildInfo', this.props.token);
       })
     );
