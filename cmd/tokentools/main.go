@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/zekroTJA/tokenToolsR/internal/api"
@@ -107,6 +108,8 @@ func main() {
 				}
 
 				guilds := make(chan *discord.GuildInfo, nguild)
+
+				time.Sleep(750 * time.Millisecond)
 
 				err := dc.GetGuilds(guilds)
 				if err != nil {
