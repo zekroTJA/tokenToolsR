@@ -24,6 +24,12 @@ var (
 	fwebdir   = flag.String("web", "./web/build", "static web files location")
 )
 
+type GuildInfoTile struct {
+	Guild *discord.GuildInfo `json:"guild"`
+	N     int                `json:"n"`
+	NMax  int                `json:"nmax"`
+}
+
 func sendInvalid(w *ws.WebSocket) {
 	go func() {
 		w.Out <- (&ws.Event{
@@ -109,7 +115,7 @@ func main() {
 
 				guilds := make(chan *discord.GuildInfo, nguild)
 
-				time.Sleep(750 * time.Millisecond)
+				time.Sleep(1000 * time.Millisecond)
 
 				err := dc.GetGuilds(guilds)
 				if err != nil {
@@ -117,25 +123,26 @@ func main() {
 					return
 				}
 
-				collectedGuilds := make([]*discord.GuildInfo, nguild)
 				counter := 0
 				for {
 					select {
 					case g := <-guilds:
-						collectedGuilds[counter] = g
 						counter++
+						go func() {
+							w.Out <- (&ws.Event{
+								Name: "guildInfo",
+								Data: &GuildInfoTile{
+									Guild: g,
+									N:     counter,
+									NMax:  nguild,
+								},
+							}).Raw()
+						}()
 					}
 					if counter == nguild {
 						break
 					}
 				}
-
-				go func() {
-					w.Out <- (&ws.Event{
-						Name: "guildInfo",
-						Data: collectedGuilds,
-					}).Raw()
-				}()
 			})
 
 			w.SetHandler("getUserInfo", func(e *ws.Event) {
