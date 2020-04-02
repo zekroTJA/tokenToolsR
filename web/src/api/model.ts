@@ -5,6 +5,14 @@ export interface WSMessage {
   data: any;
 }
 
+export interface WSTokenValid {
+  avatar: string;
+  discriminator: string;
+  guilds: number;
+  id: string;
+  username: string;
+}
+
 export interface RESTResponse<T> {
   code: number;
   message: string;

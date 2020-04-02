@@ -2,7 +2,7 @@
 
 import { WSMessage } from './model';
 
-export type EventHandler = (...args: any) => void;
+export type EventHandler = (args: any) => void;
 export type EventHandlerRemover = () => void;
 
 export default class WebSocketAPI {
@@ -25,6 +25,10 @@ export default class WebSocketAPI {
 
     this.ws.onerror = (error) => {
       this.emit('error', error);
+    };
+
+    this.ws.onopen = (event) => {
+      this.emit('open', event);
     };
   }
 
@@ -54,10 +58,10 @@ export default class WebSocketAPI {
     this.ws.send(rawData);
   }
 
-  private emit(event: string, ...args: any) {
+  private emit(event: string, data: any) {
     if (this.handlers[event]) {
       this.handlers[event].forEach((h) => {
-        if (h) h(args);
+        if (h) h(data);
       });
     }
   }

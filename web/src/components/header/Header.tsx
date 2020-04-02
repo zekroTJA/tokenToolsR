@@ -2,11 +2,11 @@
 
 import React, { Component } from 'react';
 import RestAPI from '../../api/rest';
-
 import { ReactComponent as Logo } from '../../img/header-logo.svg';
-import './Header.scss';
 import { Version } from '../../api/model';
 import { Link } from 'react-router-dom';
+
+import './Header.scss';
 
 export default class Header extends Component {
   public state = {

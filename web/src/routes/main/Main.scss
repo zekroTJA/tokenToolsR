@@ -6,6 +6,16 @@
   100% { width: 0%; margin-left: 100%; }
 }
 
+@keyframes validanimation {
+  0% { border-color: #f4433600; }
+  50% { border-color: #f44336ff; }
+  100% { border-color: #f4433600; }
+}
+
+a {
+  text-decoration: none;
+}
+
 .inpt-body-container {
   width: 100%;
   display: flex;
@@ -33,12 +43,18 @@
   z-index: 1;
   padding: 10px 12px;
   text-align: center;
+
+  border: solid 2px;
+  border-color: #f4433600;
+}
+
+.token-input.invalid {
+  animation: validanimation 1s ease;
 }
 
 .validity-ident {
   width: 100%;
   height: 0px;
-  background-color: red;
 
   transition: all .25s ease;
 }
@@ -78,4 +94,8 @@
 .check-btn.loading::after {
   background-color: $c-accent-2;
   animation: loadinganimation 1s ease infinite;
+}
+
+.info-tile {
+  margin-top: 50px;
 }

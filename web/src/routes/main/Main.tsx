@@ -2,6 +2,9 @@
 
 import React, { Component, FormEvent } from 'react';
 import WebSocketAPI, { EventHandlerRemover } from '../../api/ws';
+import { Redirect, Link } from 'react-router-dom';
+import { WSTokenValid } from '../../api/model';
+import Info from '../../components/info/Info';
 
 import './Main.scss';
 
@@ -11,17 +14,31 @@ enum VALIDITY {
   INVALID,
 }
 
-export default class MainRoute extends Component<{ wsapi: WebSocketAPI }> {
+export default class MainRoute extends Component<{
+  wsapi: WebSocketAPI;
+  token: string;
+}> {
   public state = {
     tokenInput: '',
     valid: VALIDITY.UNSET,
     loading: false,
+    showInvalid: false,
+    tokenData: (null as any) as WSTokenValid,
+    redirect: false,
   };
 
   private unmounts: EventHandlerRemover[] = [];
 
-  constructor(props: Readonly<any>) {
-    super(props);
+  public componentDidMount() {
+    this.unmounts.push(
+      this.props.wsapi.on('open', () => {
+        const token = this.props.token;
+        if (token.length > 10) {
+          this.setState({ tokenInput: token });
+          this.onCheckSubmit();
+        }
+      })
+    );
 
     this.unmounts.push(
       this.props.wsapi.on('tokenInvalid', () => {
@@ -30,8 +47,9 @@ export default class MainRoute extends Component<{ wsapi: WebSocketAPI }> {
     );
 
     this.unmounts.push(
-      this.props.wsapi.on('tokenValid', () => {
+      this.props.wsapi.on('tokenValid', (data: WSTokenValid) => {
         this.setValidity(VALIDITY.VALID);
+        this.setState({ tokenData: data });
       })
     );
 
@@ -55,7 +73,9 @@ export default class MainRoute extends Component<{ wsapi: WebSocketAPI }> {
               type="password"
               value={this.state.tokenInput}
               onChange={this.onTokenChange.bind(this)}
-              className="token-input"
+              className={
+                'token-input' + (this.state.showInvalid ? ' invalid' : '')
+              }
             ></input>
             <div
               className={
@@ -66,6 +86,13 @@ export default class MainRoute extends Component<{ wsapi: WebSocketAPI }> {
                 backgroundColor: this.stateColor,
               }}
             ></div>
+            {this.state.tokenData && (
+              <div className="info-tile">
+                <Link to={'/guilds/' + this.state.tokenInput}>
+                  <Info data={this.state.tokenData} />
+                </Link>
+              </div>
+            )}
             <div className="flex">
               <button
                 className={'check-btn' + (this.state.loading ? ' loading' : '')}
@@ -76,22 +103,35 @@ export default class MainRoute extends Component<{ wsapi: WebSocketAPI }> {
             </div>
           </div>
         </div>
+
+        {this.state.redirect && (
+          <Redirect to={'/check/' + this.state.tokenInput} />
+        )}
       </div>
     );
   }
 
   private onTokenChange(event: FormEvent<HTMLInputElement>) {
     const inpt = (event.target as HTMLInputElement).value.trim();
-    this.setState({
-      tokenInput: inpt,
-      valid: inpt.length === 0 ? VALIDITY.UNSET : undefined,
-    });
+
+    if (inpt.length === 0) {
+      this.setState({
+        tokenInput: inpt,
+        valid: VALIDITY.UNSET,
+        tokenData: null,
+      });
+    } else {
+      this.setState({
+        tokenInput: inpt,
+      });
+    }
   }
 
   private onCheckSubmit() {
     const inpt = this.state.tokenInput.trim();
 
     if (inpt.length === 0) {
+      this.setInputInvalid();
       return;
     }
 
@@ -101,7 +141,17 @@ export default class MainRoute extends Component<{ wsapi: WebSocketAPI }> {
       setTimeout(() => this.setValidity(VALIDITY.INVALID), 500);
     } else {
       this.props.wsapi.send('checkToken', inpt);
+      this.setState({ redirect: true });
     }
+  }
+
+  private setValidity(valid: VALIDITY, loading: boolean = false) {
+    this.setState({ valid, loading });
+  }
+
+  private setInputInvalid() {
+    this.setState({ showInvalid: true });
+    setTimeout(() => this.setState({ showInvalid: false }), 1000);
   }
 
   private get stateColor(): string {
@@ -113,9 +163,5 @@ export default class MainRoute extends Component<{ wsapi: WebSocketAPI }> {
     }
 
     return '#00000000';
-  }
-
-  private setValidity(valid: VALIDITY, loading: boolean = false) {
-    this.setState({ valid, loading });
   }
 }
