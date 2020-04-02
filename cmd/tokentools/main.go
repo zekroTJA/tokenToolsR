@@ -41,6 +41,15 @@ func sendValid(w *ws.WebSocket, info *discord.User) {
 	}()
 }
 
+func sendError(w *ws.WebSocket, err error) {
+	go func() {
+		w.Out <- (&ws.Event{
+			Name: "error",
+			Data: err.Error(),
+		}).Raw()
+	}()
+}
+
 func main() {
 
 	flag.Parse()
@@ -79,8 +88,21 @@ func main() {
 			})
 
 			w.SetHandler("getGuildInfo", func(e *ws.Event) {
+				token := e.Data.(string)
+				if token != "" {
+					if dc, err = discord.NewDiscord(token); err != nil {
+						sendError(w, err)
+						return
+					}
+					info, err := dc.GetInfo()
+					if err != nil {
+						sendError(w, err)
+						return
+					}
+					nguild = info.Guilds
+				}
+
 				if dc == nil {
-					log.Println(dc)
 					return
 				}
 
