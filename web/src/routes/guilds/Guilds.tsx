@@ -2,10 +2,10 @@
 
 import React, { Component } from 'react';
 import WebSocketAPI, { EventHandlerRemover } from '../../api/ws';
-
-import './Guilds.scss';
 import { WSGuilds } from '../../api/model';
 import GuildTile from '../../components/guild-tile/GuildTile';
+
+import './Guilds.scss';
 
 export default class GuildsRoute extends Component<{
   wsapi: WebSocketAPI;
@@ -25,8 +25,9 @@ export default class GuildsRoute extends Component<{
     );
 
     this.unmounts.push(
-      this.props.wsapi.on('guildInfo', (data: WSGuilds) => {
-        this.setState({ guilds: data });
+      this.props.wsapi.on('guildInfo', (data: any) => {
+        this.state.guilds.push(data.guild);
+        this.setState({});
       })
     );
   }
