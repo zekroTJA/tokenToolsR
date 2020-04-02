@@ -1,5 +1,7 @@
 /** @format */
 
+export type WSGuilds = WSGuild[];
+
 export interface WSMessage {
   event: string;
   data: any;
@@ -11,6 +13,14 @@ export interface WSTokenValid {
   guilds: number;
   id: string;
   username: string;
+}
+
+export interface WSGuild {
+  id: string;
+  name: string;
+  owner: string;
+  members: number;
+  icon: string;
 }
 
 export interface RESTResponse<T> {

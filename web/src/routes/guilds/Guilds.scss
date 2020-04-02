@@ -1,0 +1,10 @@
+.guilds-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 30px auto 0 auto;
+
+  > * {
+    margin-bottom: 15px;
+    cursor: pointer;
+  }
+}
