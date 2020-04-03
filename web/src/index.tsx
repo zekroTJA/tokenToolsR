@@ -12,8 +12,8 @@ const wsuri =
     ? 'ws://localhost:8081/ws'
     : window.location.origin.replace(
         /((http)|(https)):\/\//gm,
-        window.location.origin.startsWith('http://') ? 'ws:/' : 'wss://'
-      ) + 'ws';
+        window.location.origin.startsWith('http://') ? 'ws://' : 'wss://'
+      ) + '/ws';
 
 const wsapi = new WebSocketAPI(wsuri);
 
