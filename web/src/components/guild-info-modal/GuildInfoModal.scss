@@ -12,9 +12,8 @@
 
   #modal {
     width: 90%;
-    height: 90%;
+    height: fit-content;
     max-width: 800px;
-    max-height: 600px;
     margin: auto;
     padding: 20px;
 
@@ -25,6 +24,7 @@
       width: 100%;
       display: flex;
       background-color: transparent;
+      margin-bottom: 20px;
 
       .close-btn {
         margin-left: auto;
@@ -39,5 +39,29 @@
         margin: auto 0;
       }
     }
+  }
+}
+
+.info-head {
+  margin-bottom: 25px;
+}
+
+.owner-tile {
+  width: 100%;
+  height: 100px;
+  background-color: $c-bg-1;
+
+  display: grid;
+  column-gap: 20px;
+  grid-template-columns: 100px auto;
+  grid-template-rows: 45% 35% auto;
+
+  * {
+    margin: auto 0 0 0;
+  }
+
+  .id {
+    grid-column-start: 2;
+    font-style: italic;
   }
 }

@@ -6,6 +6,7 @@ import { WSGuild, WSUser } from '../../api/model';
 import { ReactComponent as CloseIcon } from '../../img/close.svg';
 
 import './GuildInfoModal.scss';
+import DefAvatar from '../def-avatar/DefAvatar';
 
 export default class GuildInfoModal extends Component<{
   wsapi: WebSocketAPI;
@@ -41,11 +42,14 @@ export default class GuildInfoModal extends Component<{
   }
 
   public render() {
+    const guild = this.props.guild;
+    const owner = this.state.owner;
+
     return (
       <div id="modal-wrapper" onClick={this.onBgClick.bind(this)}>
         <div id="modal">
           <div className="header">
-            <h2>{this.props.guild.name}</h2>
+            <h2>{guild.name}</h2>
             <a
               href="#"
               className="close-btn"
@@ -54,6 +58,23 @@ export default class GuildInfoModal extends Component<{
               <CloseIcon width="25" />
             </a>
           </div>
+          <div className="info-head">
+            GUILD-ID: <span className="embed">{guild.id}</span>
+          </div>
+          {owner && (
+            <div className="owner-tile">
+              <DefAvatar
+                src={owner.avatar}
+                width={100}
+                height={100}
+                alt={owner.username}
+              />
+              <h2 className="heading">
+                {owner.username}#{owner.discriminator}
+              </h2>
+              <p className="id">({owner.id})</p>
+            </div>
+          )}
         </div>
       </div>
     );

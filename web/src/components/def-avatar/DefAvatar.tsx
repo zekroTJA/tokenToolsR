@@ -41,6 +41,8 @@ export default class DefAvatar extends Component<{
     const img = (
       <img
         src={this.props.src}
+        width={this.props.width}
+        height={this.props.height}
         alt={this.props.alt}
         onError={this.onError.bind(this)}
       />

@@ -32,3 +32,15 @@ a {
   width: fit-content;
   height: fit-content;
 }
+
+.embed {
+  grid-column-start: 2;
+  grid-row-start: 3;
+
+  font-size: 14px;
+  padding: 4px 10px;
+  width: fit-content;
+  background-color: $c-bg-1;
+
+  font-family: monospace;
+}
