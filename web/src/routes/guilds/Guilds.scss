@@ -1,7 +1,10 @@
+$padding: 30px;
+
 .guilds-container {
   width: 100%;
-  max-width: 800px;
-  margin: 30px auto 0 auto;
+  max-width: 800px + $padding;
+  margin: $padding auto 0 auto;
+  padding: 0 50px;
 
   > * {
     margin-bottom: 15px;

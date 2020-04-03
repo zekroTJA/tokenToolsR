@@ -23,6 +23,14 @@ export interface WSGuild {
   icon: string;
 }
 
+export interface WSUser {
+  avatar: string;
+  discriminator: string;
+  guilds: number;
+  id: string;
+  username: string;
+}
+
 export interface RESTResponse<T> {
   code: number;
   message: string;

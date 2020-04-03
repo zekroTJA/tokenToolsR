@@ -1,0 +1,43 @@
+@import '../../styles/vars.scss';
+
+#modal-wrapper {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background-color: rgba(0, 0, 0, 0.6);
+
+  #modal {
+    width: 90%;
+    height: 90%;
+    max-width: 800px;
+    max-height: 600px;
+    margin: auto;
+    padding: 20px;
+
+    background-color: $c-bg-2;
+    box-shadow: rgba(0, 0, 0, 0.5) 0px 20px 50px 0px;
+
+    .header {
+      width: 100%;
+      display: flex;
+      background-color: transparent;
+
+      .close-btn {
+        margin-left: auto;
+        transition: all .25s ease;
+
+        &:hover {
+          transform: rotate(90deg);
+        }
+      }
+
+      * {
+        margin: auto 0;
+      }
+    }
+  }
+}
