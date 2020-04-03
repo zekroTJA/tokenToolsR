@@ -59,7 +59,18 @@ export default class GuildInfoModal extends Component<{
             </a>
           </div>
           <div className="info-head">
-            GUILD-ID: <span className="embed">{guild.id}</span>
+            <table>
+              <tbody>
+                <tr>
+                  <th>Guild ID</th>
+                  <td>{guild.id}</td>
+                </tr>
+                <tr>
+                  <th>Members</th>
+                  <td>{guild.members}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           {owner && (
             <div className="owner-tile">
@@ -72,7 +83,7 @@ export default class GuildInfoModal extends Component<{
               <h2 className="heading">
                 {owner.username}#{owner.discriminator}
               </h2>
-              <p className="id">({owner.id})</p>
+              <p className="id">{owner.id}</p>
             </div>
           )}
         </div>

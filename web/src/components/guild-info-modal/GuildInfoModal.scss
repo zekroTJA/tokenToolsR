@@ -44,6 +44,15 @@
 
 .info-head {
   margin-bottom: 25px;
+
+  table {
+    text-align: left;
+  }
+
+  td {
+    padding-left: 20px;
+    font-family: monospace;
+  }
 }
 
 .owner-tile {
@@ -52,7 +61,7 @@
   background-color: $c-bg-1;
 
   display: grid;
-  column-gap: 20px;
+  column-gap: 22px;
   grid-template-columns: 100px auto;
   grid-template-rows: 45% 35% auto;
 

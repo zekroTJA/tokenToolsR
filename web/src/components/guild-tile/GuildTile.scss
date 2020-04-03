@@ -1,3 +1,5 @@
+@import '../../styles/vars.scss';
+
 $height: 60px;
 
 .guild {
@@ -6,9 +8,9 @@ $height: 60px;
   background-color: rgba(0, 0, 0, 0.5);
 
   display: grid;
-  column-gap: 20px;
-  grid-template-columns: $height auto;
-  grid-template-rows: 50% 30%;
+  column-gap: 15px;
+  grid-template-columns: $height auto auto;
+  grid-template-rows: 52% 30%;
 
   transition: all .25s ease;
 
@@ -23,6 +25,20 @@ $height: 60px;
   .id {
     grid-column-start: 2;
     font-size: 12px;
+  }
+
+  .members {
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 3;
+    background-color: $c-accent-1;
+    padding: 3px 10px;
+
+    margin: 18px 18px auto auto;
+
+    > svg {
+      margin-right: 5px;
+    }
   }
 
   &:hover{
