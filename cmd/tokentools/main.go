@@ -30,31 +30,20 @@ type GuildInfoTile struct {
 	NMax  int                `json:"nmax"`
 }
 
-func sendInvalid(w *ws.WebSocket) {
-	go func() {
-		w.Out <- (&ws.Event{
-			Name: "tokenInvalid",
-			Data: nil,
-		}).Raw()
-	}()
+func sendInvalid(w *ws.WebSocket, cid int) {
+	w.Send("invalid", cid, nil)
 }
 
-func sendValid(w *ws.WebSocket, info *discord.User) {
-	go func() {
-		w.Out <- (&ws.Event{
-			Name: "tokenValid",
-			Data: info,
-		}).Raw()
-	}()
+func sendValid(w *ws.WebSocket, cid int, info *discord.User) {
+	w.Send("valid", cid, info)
 }
 
-func sendError(w *ws.WebSocket, err error) {
-	go func() {
-		w.Out <- (&ws.Event{
-			Name: "error",
-			Data: err.Error(),
-		}).Raw()
-	}()
+func sendError(w *ws.WebSocket, cid int, err error) {
+	w.Send("error", cid, err.Error())
+}
+
+func sendErrorS(w *ws.WebSocket, cid int, err string, v ...interface{}) {
+	sendError(w, cid, fmt.Errorf(err, v))
 }
 
 func main() {
@@ -73,95 +62,105 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		if w, err := ws.NewWebSocket(w, r); err == nil {
+		if s, err := ws.NewWebSocket(w, r); err == nil {
 
 			var dc *discord.Discord
-			var nguild int
-			var err error
+			var nguilds = -1
 
-			w.SetHandler("checkToken", func(e *ws.Event) {
-				dc, err = discord.NewDiscord(e.Data.(string))
-				if err != nil {
-					sendInvalid(w)
+			s.SetHandler("init", func(e *ws.Event) {
+				token, _ := e.Data.(string)
+				if token == "" {
+					sendErrorS(s, e.CID, "invalid token payload")
 					return
 				}
-				info, err := dc.GetInfo()
-				if err != nil {
-					sendInvalid(w)
-					return
-				}
-				nguild = info.Guilds
-				sendValid(w, info)
+
+				dc = discord.NewDiscord(token)
+				nguilds = -1
 			})
 
-			w.SetHandler("getGuildInfo", func(e *ws.Event) {
-				token := e.Data.(string)
-				if token != "" {
-					if dc, err = discord.NewDiscord(token); err != nil {
-						sendError(w, err)
-						return
-					}
-					info, err := dc.GetInfo()
-					if err != nil {
-						sendError(w, err)
-						return
-					}
-					nguild = info.Guilds
-				}
-
+			s.SetHandler("check", func(e *ws.Event) {
 				if dc == nil {
+					sendErrorS(s, e.CID, "not initialized")
 					return
 				}
 
-				guilds := make(chan *discord.GuildInfo, nguild)
+				info, err := dc.GetInfo()
+				if err != nil {
+					sendInvalid(s, e.CID)
+					return
+				}
+				nguilds = info.Guilds
+				sendValid(s, e.CID, info)
+			})
 
-				time.Sleep(1000 * time.Millisecond)
+			s.SetHandler("guildinfo", func(e *ws.Event) {
+				if dc == nil {
+					sendErrorS(s, e.CID, "not initialized")
+					return
+				}
+
+				if nguilds < 0 {
+					info, err := dc.GetInfo()
+					if err != nil {
+						sendError(s, e.CID, err)
+						return
+					}
+					nguilds = info.Guilds
+					time.Sleep(1000 * time.Millisecond)
+				}
+
+				if nguilds == 0 {
+					return
+				}
+
+				guilds := make(chan *discord.GuildInfo, nguilds)
 
 				err := dc.GetGuilds(guilds)
 				if err != nil {
+					sendError(s, e.CID, err)
 					log.Println("[ERR]", err)
 					return
 				}
 
 				counter := 0
+				n := nguilds
 				for {
 					select {
 					case g := <-guilds:
 						counter++
 						go func() {
-							w.Out <- (&ws.Event{
-								Name: "guildInfo",
-								Data: &GuildInfoTile{
-									Guild: g,
-									N:     counter,
-									NMax:  nguild,
-								},
-							}).Raw()
+							s.Send("guildinfo", e.CID, &GuildInfoTile{
+								Guild: g,
+								N:     counter,
+								NMax:  n,
+							})
 						}()
 					}
-					if counter == nguild {
+					if counter == n {
 						break
 					}
 				}
 			})
 
-			w.SetHandler("getUserInfo", func(e *ws.Event) {
+			s.SetHandler("userinfo", func(e *ws.Event) {
 				if dc == nil {
+					sendErrorS(s, e.CID, "not initialized")
 					return
 				}
 
-				uid := e.Data.(string)
-				user, err := dc.GetUser(uid)
-				if err == nil {
-					go func() {
-						w.Out <- (&ws.Event{
-							Name: "userInfo",
-							Data: user,
-						}).Raw()
-					}()
-				} else {
-					fmt.Println("[ERR]", err)
+				uid, _ := e.Data.(string)
+				if uid == "" {
+					sendErrorS(s, e.CID, "invalid user ID payload")
+					return
 				}
+
+				user, err := dc.GetUser(uid)
+				if err != nil {
+					sendError(s, e.CID, err)
+					return
+				}
+
+				s.Send("userinfo", e.CID, user)
 			})
 
 		} else {
