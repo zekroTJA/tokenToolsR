@@ -2,13 +2,14 @@
 
 import { WSMessage } from './model';
 
-export type EventHandler = (args: any) => void;
+export type EventHandler = (data: any, cid: number) => void;
 export type EventHandlerRemover = () => void;
 
 export default class WebSocketAPI {
   private ws: WebSocket;
   private handlers: { [key: string]: EventHandler[] } = {};
   private open = false;
+  private _cid = 0;
 
   constructor(url: string) {
     this.ws = new WebSocket(url);
@@ -17,7 +18,7 @@ export default class WebSocketAPI {
       try {
         const data = JSON.parse(response.data) as WSMessage;
         if (data) {
-          this.emit(data.event, data.data);
+          this.emit(data.event, data.data, data.cid);
         }
       } catch (err) {
         this.emit('error', err);
@@ -53,31 +54,40 @@ export default class WebSocketAPI {
 
   public onopen(handler: EventHandler): EventHandlerRemover {
     if (this.open) {
-      handler(null);
+      handler(null, -1);
       return () => {};
     }
 
     return this.on('open', handler);
   }
 
-  public send(event: string, data: any) {
+  public send(event: string, data?: any, cid?: number): number {
+    cid = cid ?? this.cid;
+
     const rawData = JSON.stringify({
       event,
+      cid,
       data,
     } as WSMessage);
 
     this.ws.send(rawData);
+
+    return cid;
   }
 
   public get isOpen(): boolean {
     return this.open;
   }
 
-  private emit(event: string, data: any) {
+  private emit(event: string, data: any, cid: number = -1) {
     if (this.handlers[event]) {
       this.handlers[event].forEach((h) => {
-        if (h) h(data);
+        if (h) h(data, cid);
       });
     }
+  }
+
+  private get cid(): number {
+    return this._cid++;
   }
 }

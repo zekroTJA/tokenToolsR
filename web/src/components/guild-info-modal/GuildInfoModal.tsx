@@ -25,14 +25,14 @@ export default class GuildInfoModal extends Component<{
 
   public componentDidMount() {
     this.unmounts.push(
-      this.props.wsapi.on('userInfo', (data: WSUser) => {
+      this.props.wsapi.on('userinfo', (data: WSUser) => {
         this.setState({ owner: data });
       })
     );
 
     this.unmounts.push(
       this.props.wsapi.onopen(() => {
-        this.props.wsapi.send('getUserInfo', this.props.guild.owner);
+        this.props.wsapi.send('userinfo', this.props.guild.owner);
       })
     );
   }

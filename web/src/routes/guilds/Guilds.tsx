@@ -22,12 +22,13 @@ export default class GuildsRoute extends Component<{
   public componentDidMount() {
     this.unmounts.push(
       this.props.wsapi.onopen(() => {
-        this.props.wsapi.send('getGuildInfo', this.props.token);
+        this.props.wsapi.send('init', this.props.token);
+        setTimeout(() => this.props.wsapi.send('guildinfo'), 100);
       })
     );
 
     this.unmounts.push(
-      this.props.wsapi.on('guildInfo', (data: any) => {
+      this.props.wsapi.on('guildinfo', (data: any) => {
         this.state.guilds.push(data.guild);
         this.setState({});
       })

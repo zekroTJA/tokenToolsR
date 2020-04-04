@@ -4,6 +4,7 @@ export type WSGuilds = WSGuild[];
 
 export interface WSMessage {
   event: string;
+  cid: number;
   data: any;
 }
 

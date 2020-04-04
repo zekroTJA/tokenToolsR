@@ -2,7 +2,7 @@
 APPNAME  = tokenToolsR
 PACKAGE  = github.com/zekroTJA/$(APPNAME)
 LDPAKAGE = static
-ARGS     = -port 8081
+ARGS     = -addr localhost:8081
 ###############################################
 
 ### EXECUTABLES ###############################
