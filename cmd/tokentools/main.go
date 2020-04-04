@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	fport     = flag.String("port", "80", "Port which will be used to expose the app's web interface")
+	faddr     = flag.String("addr", "localhost:80", "Port which will be used to expose the app's web interface")
 	fversion  = flag.Bool("version", false, "Display build version")
 	fcertfile = flag.String("tls-cert", "", "The TLS cert file")
 	fkeyfile  = flag.String("tls-key", "", "The TLS key file")
@@ -179,9 +179,9 @@ func main() {
 	log.Println("[INFO] listening...")
 	var err error
 	if *ftls && *fcertfile != "" && *fkeyfile != "" {
-		err = http.ListenAndServeTLS(":"+*fport, *fcertfile, *fkeyfile, nil)
+		err = http.ListenAndServeTLS(*faddr, *fcertfile, *fkeyfile, nil)
 	} else {
-		err = http.ListenAndServe(":"+*fport, nil)
+		err = http.ListenAndServe(*faddr, nil)
 	}
 	if err != nil {
 		log.Fatal(err)

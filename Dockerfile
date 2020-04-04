@@ -37,4 +37,4 @@ EXPOSE 8080
 
 ENTRYPOINT ["/app/tt", "-web", "/app/web"]
 
-CMD ["-port", "8080"]
+CMD ["-addr", "localhost:8080"]
