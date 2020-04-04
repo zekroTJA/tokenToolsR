@@ -14,7 +14,6 @@ const (
 )
 
 type Discord struct {
-	token  string
 	client *http.Client
 	header http.Header
 }
@@ -48,42 +47,16 @@ type GuildInfo struct {
 	IconHash string `json:"icon"`
 }
 
-func NewDiscord(token string) (*Discord, error) {
+func NewDiscord(token string) *Discord {
 	client := &http.Client{}
 	header := http.Header{}
 	header.Add("User-Agent", "DiscordBot (https://github.com/zekrotja, 0.1.0)")
-	header.Add("Authorization", "Bot "+token)
+	header.Add("Authorization", fmt.Sprintf("Bot %s", token))
 	discord := &Discord{
-		token:  "Bot " + token,
 		client: client,
 		header: header,
 	}
-	return discord, nil
-}
-
-func (d *Discord) request(method, endpoint string, data []byte, output interface{}) error {
-	req, err := http.NewRequest(method, APIROOT+"/"+endpoint, bytes.NewBuffer(data))
-	if err != nil {
-		return err
-	}
-	req.Header = d.header
-
-	res, err := d.client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("discord response: %d", res.StatusCode)
-	}
-
-	resData, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(resData, output)
-	return err
+	return discord
 }
 
 func (d *Discord) GetInfo() (*User, error) {
@@ -112,7 +85,7 @@ func (d *Discord) GetInfo() (*User, error) {
 
 func (d *Discord) GetUser(uid string) (*User, error) {
 	user := new(User)
-	err := d.request("GET", "users/"+uid, nil, user)
+	err := d.request("GET", fmt.Sprintf("users/%s", uid), nil, user)
 	if user.Avatar == "" {
 		user.Avatar = DEFAVATAR
 	} else {
@@ -131,14 +104,14 @@ func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {
 	for _, gld := range guildsResp {
 		go func(g *Guild) {
 			guild := new(Guild)
-			err = d.request("GET", "guilds/"+g.ID, nil, guild)
+			err = d.request("GET", fmt.Sprintf("guilds/%s", g.ID), nil, guild)
 			if err == nil {
 				ownerid := guild.Owner
 
 				guildMembers := make([]*struct {
 					ID string `json:"id"`
 				}, 0)
-				d.request("GET", "guilds/"+g.ID+"/members?limit=1000", nil, &guildMembers)
+				d.request("GET", fmt.Sprintf("guilds/%s/members?limit=1000", g.ID), nil, &guildMembers)
 
 				guildInfo := &GuildInfo{
 					ID:       guild.ID,
@@ -153,4 +126,29 @@ func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {
 	}
 
 	return nil
+}
+
+func (d *Discord) request(method, endpoint string, data []byte, output interface{}) error {
+	req, err := http.NewRequest(method, fmt.Sprintf("%s/%s", APIROOT, endpoint), bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	req.Header = d.header
+
+	res, err := d.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("discord response: %d", res.StatusCode)
+	}
+
+	resData, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(resData, output)
+	return err
 }

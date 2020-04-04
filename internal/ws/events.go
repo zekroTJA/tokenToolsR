@@ -8,6 +8,7 @@ type EventHandler func(*Event)
 
 type Event struct {
 	Name string      `json:"event"`
+	CID  int         `json:"cid"`
 	Data interface{} `json:"data"`
 }
 

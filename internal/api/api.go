@@ -83,11 +83,7 @@ func InitApi(r *mux.Router, root string) {
 			return
 		}
 
-		discord, err := discord.NewDiscord(token)
-		if err != nil {
-			sendResponse(w, 500, err)
-			return
-		}
+		discord := discord.NewDiscord(token)
 		info, err := discord.GetInfo()
 		if err != nil {
 			sendResponse(w, 200, &TokenState{Valid: false})
@@ -125,11 +121,7 @@ func InitApi(r *mux.Router, root string) {
 			return
 		}
 
-		dc, err := discord.NewDiscord(token)
-		if err != nil {
-			sendResponse(w, 500, err)
-			return
-		}
+		dc := discord.NewDiscord(token)
 
 		nguild, ok := tokenChache[token]
 		if !ok {
@@ -145,7 +137,7 @@ func InitApi(r *mux.Router, root string) {
 
 		guilds := make(chan *discord.GuildInfo, nguild)
 
-		err = dc.GetGuilds(guilds)
+		err := dc.GetGuilds(guilds)
 		if err != nil {
 			log.Println("[ERR]", err)
 			return

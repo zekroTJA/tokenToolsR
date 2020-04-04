@@ -41,13 +41,13 @@ export default class MainRoute extends Component<{
     );
 
     this.unmounts.push(
-      this.props.wsapi.on('tokenInvalid', () => {
+      this.props.wsapi.on('invalid', () => {
         this.setValidity(VALIDITY.INVALID);
       })
     );
 
     this.unmounts.push(
-      this.props.wsapi.on('tokenValid', (data: WSTokenValid) => {
+      this.props.wsapi.on('valid', (data: WSTokenValid) => {
         this.setValidity(VALIDITY.VALID);
         this.setState({ tokenData: data });
       })
@@ -140,7 +140,8 @@ export default class MainRoute extends Component<{
     if (inpt.length <= 40) {
       setTimeout(() => this.setValidity(VALIDITY.INVALID), 500);
     } else {
-      this.props.wsapi.send('checkToken', inpt);
+      this.props.wsapi.send('init', inpt);
+      setTimeout(() => this.props.wsapi.send('check'), 100);
       this.setState({ redirect: true });
     }
   }
