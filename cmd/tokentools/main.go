@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/zekroTJA/tokenToolsR/internal/api"
 	"github.com/zekroTJA/tokenToolsR/internal/discord"
+	"github.com/zekroTJA/tokenToolsR/internal/spa"
 	"github.com/zekroTJA/tokenToolsR/internal/static"
 	"github.com/zekroTJA/tokenToolsR/internal/ws"
 )
@@ -20,7 +21,14 @@ var (
 	fcertfile = flag.String("tls-cert", "", "The TLS cert file")
 	fkeyfile  = flag.String("tls-key", "", "The TLS key file")
 	ftls      = flag.Bool("tls", false, "Wether or not to enable TLS")
+	fwebdir   = flag.String("web", "./web/build", "static web files location")
 )
+
+type GuildInfoTile struct {
+	Guild *discord.GuildInfo `json:"guild"`
+	N     int                `json:"n"`
+	NMax  int                `json:"nmax"`
+}
 
 func sendInvalid(w *ws.WebSocket) {
 	go func() {
@@ -40,12 +48,21 @@ func sendValid(w *ws.WebSocket, info *discord.User) {
 	}()
 }
 
+func sendError(w *ws.WebSocket, err error) {
+	go func() {
+		w.Out <- (&ws.Event{
+			Name: "error",
+			Data: err.Error(),
+		}).Raw()
+	}()
+}
+
 func main() {
 
 	flag.Parse()
 
 	if *fversion {
-		fmt.Printf("tokenToolsR © 2018 zekro Development\n"+
+		fmt.Printf("tokenToolsR © 2020 zekro Development\n"+
 			"Version:   %s\n"+
 			"Commit:    %s\n"+
 			"Date:      %s\n",
@@ -54,18 +71,6 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t := template.New("index.html")
-		t, _ = t.ParseFiles("./web/views/index.html")
-		t.Execute(w, struct {
-			VERSION string
-			COMMIT  string
-			DATE    string
-		}{
-			static.AppVersion, static.AppCommit, static.AppDate,
-		})
-	})
 
 	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		if w, err := ws.NewWebSocket(w, r); err == nil {
@@ -90,12 +95,27 @@ func main() {
 			})
 
 			w.SetHandler("getGuildInfo", func(e *ws.Event) {
+				token := e.Data.(string)
+				if token != "" {
+					if dc, err = discord.NewDiscord(token); err != nil {
+						sendError(w, err)
+						return
+					}
+					info, err := dc.GetInfo()
+					if err != nil {
+						sendError(w, err)
+						return
+					}
+					nguild = info.Guilds
+				}
+
 				if dc == nil {
-					log.Println(dc)
 					return
 				}
 
 				guilds := make(chan *discord.GuildInfo, nguild)
+
+				time.Sleep(1000 * time.Millisecond)
 
 				err := dc.GetGuilds(guilds)
 				if err != nil {
@@ -103,25 +123,26 @@ func main() {
 					return
 				}
 
-				collectedGuilds := make([]*discord.GuildInfo, nguild)
 				counter := 0
 				for {
 					select {
 					case g := <-guilds:
-						collectedGuilds[counter] = g
 						counter++
+						go func() {
+							w.Out <- (&ws.Event{
+								Name: "guildInfo",
+								Data: &GuildInfoTile{
+									Guild: g,
+									N:     counter,
+									NMax:  nguild,
+								},
+							}).Raw()
+						}()
 					}
 					if counter == nguild {
 						break
 					}
 				}
-
-				go func() {
-					w.Out <- (&ws.Event{
-						Name: "guildInfo",
-						Data: collectedGuilds,
-					}).Raw()
-				}()
 			})
 
 			w.SetHandler("getUserInfo", func(e *ws.Event) {
@@ -150,8 +171,10 @@ func main() {
 
 	api.InitApi(router, "/api")
 
+	spaHandler := spa.NewSPA(*fwebdir, "index.html")
+	router.PathPrefix("/").Handler(spaHandler)
+
 	http.Handle("/", router)
-	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./web/assets"))))
 
 	log.Println("[INFO] listening...")
 	var err error

@@ -1,0 +1,40 @@
+@import '../../styles/vars.scss';
+
+$height: 100px;
+
+.tile {
+  width: 100%;
+  height: $height;
+  cursor: pointer;
+  background-color: #0000004d;
+
+  display: grid;
+  column-gap: 20px;
+  grid-template-columns: $height auto;
+  grid-template-rows: 35% 22% 33%;
+
+  box-sizing: content-box;
+  border: solid 0px $c-accent-1;
+
+  transition: all .25s ease;
+
+  > img {
+    width: 100%;
+  }
+
+  > * {
+    margin: auto 0 0 0;
+  }
+
+  > .id {
+    grid-column-start: 2;
+    grid-row-start: 2;
+
+    font-size: 14px;
+  }
+
+  &:hover {
+    border-width: 3px;
+    transform: scale(1.03);
+  }
+}

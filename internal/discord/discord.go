@@ -33,17 +33,19 @@ type User struct {
 }
 
 type Guild struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Owner   string `json:"owner_id"`
-	Members int    `json:"member_count"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Owner    string `json:"owner_id"`
+	Members  int    `json:"member_count"`
+	IconHash string `json:"icon"`
 }
 
 type GuildInfo struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Owner   string `json:"owner"`
-	Members int    `json:"members"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Owner    string `json:"owner"`
+	Members  int    `json:"members"`
+	IconHash string `json:"icon"`
 }
 
 func NewDiscord(token string) (*Discord, error) {
@@ -139,10 +141,11 @@ func (d *Discord) GetGuilds(guilds chan *GuildInfo) error {
 				d.request("GET", "guilds/"+g.ID+"/members?limit=1000", nil, &guildMembers)
 
 				guildInfo := &GuildInfo{
-					ID:      guild.ID,
-					Name:    guild.Name,
-					Owner:   ownerid,
-					Members: len(guildMembers),
+					ID:       guild.ID,
+					Name:     guild.Name,
+					Owner:    ownerid,
+					Members:  len(guildMembers),
+					IconHash: guild.IconHash,
 				}
 				guilds <- guildInfo
 			}

@@ -1,0 +1,25 @@
+@import '../../styles/vars.scss';
+
+$padding: 30px;
+
+.about-wrapper {
+  width: 100%;
+  max-width: 800px + 2 * $padding;
+  padding: $padding;
+  margin: 0 auto;
+
+  line-height: 1.5;
+
+  .about-header {
+    display: flex;
+    margin-bottom: 50px;
+  }
+
+  > h2 {
+    text-align: center;
+  }
+
+  > a {
+    color: $c-accent-1;
+  }
+}

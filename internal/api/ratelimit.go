@@ -16,7 +16,7 @@ const (
 
 var limiters = make(map[string]*ratelimit.Limiter)
 
-func CheckRatelimit(w http.ResponseWriter, r *http.Request) bool {
+func checkRatelimit(w http.ResponseWriter, r *http.Request) bool {
 	addr := getIPAddr(r)
 	if strings.Contains(addr, ":") {
 		split := strings.Split(addr, ":")
@@ -36,7 +36,7 @@ func CheckRatelimit(w http.ResponseWriter, r *http.Request) bool {
 	w.Header().Set("X-RateLimit-Reset", fmt.Sprintf("%d", res.Reset.UnixNano()))
 
 	if !a {
-		SendResponse(w, 427, nil)
+		sendResponse(w, 427, nil)
 	}
 
 	return a

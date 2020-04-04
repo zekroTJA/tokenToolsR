@@ -1,0 +1,76 @@
+@import '../../styles/vars.scss';
+
+#modal-wrapper {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background-color: rgba(0, 0, 0, 0.6);
+
+  #modal {
+    width: 90%;
+    height: fit-content;
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+
+    background-color: $c-bg-2;
+    box-shadow: rgba(0, 0, 0, 0.5) 0px 20px 50px 0px;
+
+    .header {
+      width: 100%;
+      display: flex;
+      background-color: transparent;
+      margin-bottom: 20px;
+
+      .close-btn {
+        margin-left: auto;
+        transition: all .25s ease;
+
+        &:hover {
+          transform: rotate(90deg);
+        }
+      }
+
+      * {
+        margin: auto 0;
+      }
+    }
+  }
+}
+
+.info-head {
+  margin-bottom: 25px;
+
+  table {
+    text-align: left;
+  }
+
+  td {
+    padding-left: 20px;
+    font-family: monospace;
+  }
+}
+
+.owner-tile {
+  width: 100%;
+  height: 100px;
+  background-color: $c-bg-1;
+
+  display: grid;
+  column-gap: 22px;
+  grid-template-columns: 100px auto;
+  grid-template-rows: 45% 35% auto;
+
+  * {
+    margin: auto 0 0 0;
+  }
+
+  .id {
+    grid-column-start: 2;
+    font-style: italic;
+  }
+}
