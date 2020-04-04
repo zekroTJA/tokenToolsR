@@ -1,8 +1,10 @@
 @import 'styles/vars.scss';
 
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;500&display=swap');
+
 body {
   margin: 0;
-  font-family: 'Oxygen', sans-serif;
+  font-family: 'Barlow', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 

@@ -4,10 +4,10 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import WebSocketAPI from './api/ws';
 import MainRoute from './routes/main/Main';
+import GuildsRoute from './routes/guilds/Guilds';
 import Header from './components/header/Header';
 
 import './App.scss';
-import GuildsRoute from './routes/guilds/Guilds';
 
 export default class App extends Component<{ wsapi: WebSocketAPI }> {
   public render() {

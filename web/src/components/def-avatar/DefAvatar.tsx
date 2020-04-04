@@ -74,7 +74,7 @@ export default class DefAvatar extends Component<{
       backgroundColor: this.color,
       width: this.props.width,
       height: this.props.height,
-      lineHeight: this.props.height ? this.props.height + 'px' : '100%',
+      lineHeight: this.props.height,
       textAlign: 'center',
       fontSize: Math.round((this.props.height + this.props.width) / 4),
     };
