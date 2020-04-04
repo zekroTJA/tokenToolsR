@@ -8,6 +8,7 @@ import GuildsRoute from './routes/guilds/Guilds';
 import Header from './components/header/Header';
 
 import './App.scss';
+import AboutRoute from './routes/about/About';
 
 export default class App extends Component<{ wsapi: WebSocketAPI }> {
   public render() {
@@ -29,6 +30,7 @@ export default class App extends Component<{ wsapi: WebSocketAPI }> {
             <GuildsRoute wsapi={this.props.wsapi} token={match.params.token} />
           )}
         />
+        <Route exact path="/about" render={() => <AboutRoute />} />
 
         <Route exact path="/" render={() => <Redirect to="/check/_" />} />
         <Route exact path="/check" render={() => <Redirect to="/check/_" />} />
