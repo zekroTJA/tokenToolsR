@@ -2,6 +2,8 @@
 
 import React, { Component, CSSProperties } from 'react';
 
+import './DefAvatar.scss';
+
 const COLORS = [
   '#e57373',
   '#F06292',
@@ -21,13 +23,15 @@ const COLORS = [
   '#A1887F',
 ];
 
-export default class DefAvatar extends Component<{
+export interface Props {
   src: string;
   alt: string;
   text: string;
   width: number;
   height: number;
-}> {
+}
+
+export default class DefAvatar extends Component<Props> {
   public state = {
     isError: false,
   };
@@ -47,7 +51,7 @@ export default class DefAvatar extends Component<{
         onError={this.onError.bind(this)}
       />
     );
-    const alt = <div style={this.style}>{this.character}</div>;
+    const alt = <div className="def-avatar" style={this.style}>{this.character}</div>;
 
     return this.state.isError ? alt : img;
   }
@@ -68,14 +72,10 @@ export default class DefAvatar extends Component<{
 
   private get style(): CSSProperties {
     return {
-      overflow: 'hidden',
-      margin: 0,
-      padding: 0,
       backgroundColor: this.color,
       width: this.props.width,
       height: this.props.height,
-      lineHeight: this.props.height,
-      textAlign: 'center',
+      lineHeight: this.props.height + 'px',
       fontSize: Math.round((this.props.height + this.props.width) / 4),
     };
   }

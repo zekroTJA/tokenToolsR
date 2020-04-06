@@ -44,3 +44,7 @@ $height: 40px;
     width: 100%;
   }
 }
+
+.header-link.active:after {
+  width: 100%;
+}
